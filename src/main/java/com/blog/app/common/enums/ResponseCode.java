@@ -11,7 +11,7 @@ public enum ResponseCode {
     UNAUTHORIZED_TOKEN(107, ""),
     UNAUTHORIZED_ACCESS(108, "Not authorized"),
     INVALID_ARGUMENT(109, ""),
-    TOKEN_EXPIRED(110, ""),
+    TOKEN_EXPIRED(110, "Token Expired"),
     SECURITY_ERROR(111, ""),
     DATABASE_ERROR(112, ""),
     VALIDATION_ERROR(112, "Validation Error"),

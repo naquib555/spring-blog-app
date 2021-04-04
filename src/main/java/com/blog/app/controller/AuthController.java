@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
@@ -24,6 +25,11 @@ public class AuthController {
     @PostMapping("/tokenRequest")
     public TokenResponse tokenRequest(@Valid @RequestBody TokenRequest tokenRequest) {
         return authenticationService.generateToken(tokenRequest);
+    }
+
+    @GetMapping("/logout")
+    public ApiResponse invalidateToken(HttpServletRequest request) {
+        return authenticationService.logout(request);
     }
 
     @PostMapping("/userRegistration")

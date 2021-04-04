@@ -28,6 +28,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collector;
@@ -85,6 +86,17 @@ public class AuthenticationServiceImpl implements IAuthenticationService, IUserM
         userRepository.save(userEntity);
 
         return new ApiResponse(ResponseCode.OPERATION_SUCCESSFUL.getCode(), "User registered successfully");
+    }
+
+    @Override
+    public ApiResponse logout(HttpServletRequest request) {
+        String token = JwtTokenProvider.getJwtFromRequest(request);
+        JwtTokenProvider.addBlackList(token);
+
+
+        SecurityContextHolder.clearContext();
+
+        return new ApiResponse(ResponseCode.OPERATION_SUCCESSFUL.getCode(), "Logout successfully");
     }
 
     @Override

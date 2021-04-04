@@ -1,5 +1,8 @@
 package com.blog.app.security;
 
+import com.blog.app.common.enums.ResponseCode;
+import com.blog.app.common.util.ResponseUtil;
+import com.blog.app.model.payload.ApiResponse;
 import com.blog.app.service.impl.CustomUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,16 +34,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            String jwt = getJwtFromRequest(request);
+            String jwt = JwtTokenProvider.getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+//            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+            if (StringUtils.hasText(jwt)) {
+                if(JwtTokenProvider.isBlackList(jwt)) {
+                    ResponseUtil.responseJson(response, new ApiResponse(ResponseCode.UNAUTHORIZED_TOKEN.getCode(), "Token blacklisted"));
+                    return;
+                }
+
+                if(JwtTokenProvider.hasToken(jwt)) {
+                    String expiration = JwtTokenProvider.getExpirationByToken(jwt);
+                    if (JwtTokenProvider.isExpiration(expiration)) {
+                        ResponseUtil.responseJson(response, new ApiResponse(ResponseCode.TOKEN_EXPIRED.getCode(), "Token blacklisted"));
+                        return;
+                    }
+                } else {
+                    ResponseUtil.responseJson(response, new ApiResponse(ResponseCode.UNAUTHORIZED_TOKEN.getCode(), "Invalid Token"));
+                    return;
+                }
+
                 Long userId = Long.parseLong(tokenProvider.getUserIdFromJWT(jwt));
 
-                /*
-                    Note that you could also encode the user's username and roles inside JWT claims
-                    and create the UserDetails object by parsing those claims from the JWT.
-                    That would avoid the following database hit. It's completely up to you.
-                 */
                 UserDetails userDetails = customUserDetailsService.loadUserById(userId);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -54,13 +69,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String getJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
-        }
-        return null;
     }
 }

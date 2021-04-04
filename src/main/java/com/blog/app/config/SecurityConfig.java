@@ -114,12 +114,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .logout()
-                .logoutUrl("/logout")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .clearAuthentication(true)
-                .and()
                 .authorizeRequests()
                 .antMatchers("/",
                         "/favicon.ico",
@@ -142,7 +136,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()
                 .authenticated();
 
-        // Add our custom JWT security filter
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
     }
