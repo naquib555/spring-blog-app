@@ -35,7 +35,7 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
-public class AuthenticationServiceImpl implements IAuthenticationService, IUserManagementService {
+public class AuthenticationServiceImpl implements IAuthenticationService {
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -97,43 +97,5 @@ public class AuthenticationServiceImpl implements IAuthenticationService, IUserM
         SecurityContextHolder.clearContext();
 
         return new ApiResponse(ResponseCode.OPERATION_SUCCESSFUL.getCode(), "Logout successfully");
-    }
-
-    @Override
-    public ApiResponse<List<UserMapper>> getUserListByActiveStatus(Flag flag) {
-        RoleEntity role = new RoleEntity();
-        role.setRoleName(RoleName.USER);
-
-        UserEntity searchParameter = new UserEntity();
-        searchParameter.setIsActive(Integer.parseInt(flag.getFlag()));
-        searchParameter.setRoles(Collections.singleton(role));
-
-        List<UserMapper> userList = userRepository.findAll(Example.of(searchParameter))
-                //userRepository.findAllByIsActiveAndRoles(Integer.parseInt(flag.getFlag()), Collections.singleton(role))
-                .stream()
-                .map(UserMapper::new)
-                .collect(Collectors.toList());
-
-        ResponseCode responseCode = !userList.isEmpty() ? ResponseCode.OPERATION_SUCCESSFUL : ResponseCode.NO_RECORD_FOUND;
-
-        return new ApiResponse(responseCode.getCode(), responseCode.getMessage(), userList);
-
-
-    }
-
-    @Override
-    public ApiResponse userActivation(Long userId, Flag flag) throws UsernameNotFoundException {
-        if(Utils.isEmpty(userId)) return new ApiResponse(ResponseCode.INVALID_ARGUMENT.getCode(), "UserId cannot be empty");
-        UserEntity userEntity = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with userId : " + userId));
-
-        if(userEntity.getIsActive() == Integer.parseInt(flag.getFlag()))
-            return new ApiResponse(ResponseCode.OPERATION_FAILED.getCode(), String.format("User is already %s", flag.name()));
-
-        userEntity.setIsActive(Integer.parseInt(flag.getFlag()));
-
-        userRepository.save(userEntity);
-
-        return new ApiResponse(ResponseCode.OPERATION_SUCCESSFUL.getCode(), ResponseCode.OPERATION_SUCCESSFUL.getMessage());
     }
 }

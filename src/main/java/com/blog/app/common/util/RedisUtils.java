@@ -1,4 +1,4 @@
-package com.blog.app.service.impl;
+package com.blog.app.common.util;
 
 import java.util.HashMap;
 import java.util.Set;

@@ -1,7 +1,7 @@
 package com.blog.app.security;
 
 import com.blog.app.security.domain.UserPrincipal;
-import com.blog.app.service.impl.RedisUtils;
+import com.blog.app.common.util.RedisUtils;
 import io.jsonwebtoken.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -119,15 +119,6 @@ public class JwtTokenProvider {
     }
 
 
-    public static boolean isValid(String refreshTime) {
-        LocalDateTime validTime = LocalDateTime.parse(refreshTime, df);
-        LocalDateTime localDateTime = LocalDateTime.now();
-        if (localDateTime.compareTo(validTime) > 0) {
-            return false;
-        }
-        return true;
-    }
-
 
     public static boolean hasToken(String token) {
         if (StringUtils.isNotEmpty(token)) {
@@ -145,14 +136,6 @@ public class JwtTokenProvider {
     }
 
 
-    public static String getRefreshTimeByToken(String token) {
-        if (StringUtils.isNotEmpty(token)) {
-            return RedisUtils.hget(token, "refreshTime").toString();
-        }
-        return null;
-    }
-
-
     public static String getUserIdByToken(String token) {
         if (StringUtils.isNotEmpty(token)) {
             return RedisUtils.hget(token, "userId").toString();
@@ -160,13 +143,6 @@ public class JwtTokenProvider {
         return null;
     }
 
-
-    public static String getIpByToken(String token) {
-        if (StringUtils.isNotEmpty(token)) {
-            return RedisUtils.hget(token, "ip").toString();
-        }
-        return null;
-    }
 
     public static String getJwtFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
